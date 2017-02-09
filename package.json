@@ -8,6 +8,7 @@
 	"dependencies": {
 		"express": "4.13.x",
 		"cfenv": "1.0.x",
+		"node-telegram-bot-api": "0.26.0",
 		"watson-developer-cloud":"2.18.0",
 		"prompt-sync": "4.1.4"
 	},

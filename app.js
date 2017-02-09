@@ -21,7 +21,7 @@ app.use(express.static(__dirname + '/public'));
 // get the app environment from Cloud Foundry
 var appEnv = cfenv.getAppEnv();
 
-/******************************************** 
+//******************************************** 
 
 var TelegramBot = require('node-telegram-bot-api');
 var token = '206517901:AAHl1xImPUQZI-HOulXqHt3a1PStaPEslT8';
