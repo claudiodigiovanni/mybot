@@ -10,7 +10,9 @@
 		"cfenv": "1.0.x",
 		"node-telegram-bot-api": "0.26.0",
 		"watson-developer-cloud":"2.18.0",
-		"prompt-sync": "4.1.4"
+		"prompt-sync": "4.1.4",
+		"q": "1.4.1",
+		"lodash": "4.17.4"
 	},
 	"repository": {},
 	"engines": {

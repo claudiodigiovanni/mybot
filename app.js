@@ -1,5 +1,6 @@
 
-
+var Q = require('q')
+var _ = require('lodash');
 var TelegramBot = require('node-telegram-bot-api');
 var token = '206517901:AAHl1xImPUQZI-HOulXqHt3a1PStaPEslT8';
 var ConversationV1 = require('watson-developer-cloud/conversation/v1');
@@ -16,60 +17,59 @@ var conversation = new ConversationV1({
 // Setup polling way 
 var bot = new TelegramBot(token, {polling: true});
 
-var myresp = ""
-var responsex = null
+var users = [{name:"claudio",id:"301563941", response:""}]
 
-// Process the conversation response.
-function processResponse(err, response) {
-	responsex = response
-  if (err) {
-    console.error(err); // something went wrong
-    return;
-  }
-  myresp = response.output.text[0];
-  if (response.output.action === 'display_time') {
-    // User asked what time it is, so we output the local system time.
-    console.log('The current time is ' + new Date().toLocaleTimeString());
-  } else if (response.output.action === 'end_conversation') {
-    // User said goodbye, so we're done.
-    myresp = response.output.text[0];
-    //endConversation = true;
-  } else if (response.output.action === 'verify') {
-        console.log('verify....');
-        myresp = response.output.text[0] + " " + response.output.text[1];
-        
-  }
-  else {
-    // Display the output from dialog, if any.
-    if (response.output.text.length != 0) {
-        myresp = response.output.text[0]
-    }
-  }
-  
-  
-}
-
-function sendMessageToWatson(newMessageFromUser){
-    console.log(newMessageFromUser)
+function sendMessageToWatsonAndProcessIt(newMessageFromUser,chatId){
+    
+    var myresp = ""
+    var user = _.find(users,function(u){
+      return u.id == chatId
+    })
+    var defer = Q.defer()
     conversation.message({
       input: { text: newMessageFromUser },
       // Send back the context to maintain state.
-      context : responsex ? responsex.context : null
-    }, processResponse)
+      context : user.response ? user.response.context : null
+    }, function(err,response){
+          user.response = response
+          if (err) {
+            console.error(err); // something went wrong
+            return;
+          }
+          myresp = response.output.text[0];
+          if (response.output.action === 'display_time') {
+            // User asked what time it is, so we output the local system time.
+            console.log('The current time is ' + new Date().toLocaleTimeString());
+          } else if (response.output.action === 'end_conversation') {
+            // User said goodbye, so we're done.
+            myresp = response.output.text[0];
+            //endConversation = true;
+          } else if (response.output.action === 'verify') {
+                console.log('verify....');
+                myresp = response.output.text[0] + " " + response.output.text[1];
+                
+          }
+          else {
+            // Display the output from dialog, if any.
+            if (response.output.text.length != 0) {
+                myresp = response.output.text[0]
+            }
+          }
+          defer.resolve(myresp)
 
-
+        })
+    return defer.promise
 }
 
 
 
 // Attach event on every received message 
 bot.on('message', function (message) {
-  sendMessageToWatson(message.text);
-  setTimeout(function(){
-              var chatId = message.chat.id;
-              // send a message to the chat acknowledging receipt of their message
-              bot.sendMessage(chatId, myresp);
-  },1000)
+  var chatId = message.chat.id;
+  sendMessageToWatsonAndProcessIt(message.text,chatId).then(function(response){
+    bot.sendMessage(chatId, response);
+  })
+  
 });
 
 console.log("BOT ready!");
