@@ -1,27 +1,4 @@
-/*eslint-env node*/
 
-//------------------------------------------------------------------------------
-// node.js starter application for Bluemix
-//------------------------------------------------------------------------------
-
-// This application uses express as its web server
-// for more info, see: http://expressjs.com
-var express = require('express');
-
-// cfenv provides access to your Cloud Foundry environment
-// for more info, see: https://www.npmjs.com/package/cfenv
-var cfenv = require('cfenv');
-
-// create a new express server
-var app = express();
-
-// serve the files out of ./public as our main files
-app.use(express.static(__dirname + '/public'));
-
-// get the app environment from Cloud Foundry
-var appEnv = cfenv.getAppEnv();
-
-//******************************************** 
 
 var TelegramBot = require('node-telegram-bot-api');
 var token = '206517901:AAHl1xImPUQZI-HOulXqHt3a1PStaPEslT8';
@@ -35,6 +12,9 @@ var conversation = new ConversationV1({
   version_date: '2016-07-11'
 });
 
+
+// Setup polling way 
+var bot = new TelegramBot(token, {polling: true});
 
 var myresp = ""
 var responsex = null
@@ -80,8 +60,7 @@ function sendMessageToWatson(newMessageFromUser){
 
 }
 
-// Setup polling way 
-var bot = new TelegramBot(token, {polling: true});
+
 
 // Attach event on every received message 
 bot.on('message', function (message) {
@@ -90,14 +69,7 @@ bot.on('message', function (message) {
               var chatId = message.chat.id;
               // send a message to the chat acknowledging receipt of their message
               bot.sendMessage(chatId, myresp);
-  },2000)
+  },1000)
 });
 
 console.log("BOT ready!");
-//******************************************** */
-
-// start server on the specified port and binding host
-app.listen(appEnv.port, '0.0.0.0', function() {
-  // print a message when the server starts listening
-  console.log("server starting on " + appEnv.url);
-});
