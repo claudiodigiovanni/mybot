@@ -21,8 +21,8 @@ var mongoose = require('mongoose');
 var User = require('./user.js');
 
 mongoose.set('debug', true);
-mongoose.connect("mongodb://mybooking:mareblu69030303@127.0.0.1:27017/watson");
-//mongoose.connect("mongodb://127.0.0.1:27017/watson");
+//mongoose.connect("mongodb://mybooking:mareblu69030303@127.0.0.1:27017/watson");
+mongoose.connect("mongodb://127.0.0.1:27017/watson");
 mongoose.connection.on('error', function () {
     debug('Mongoose connection error');
 });
@@ -255,11 +255,13 @@ var users = []
 
 // On commands
 bot.on(['/start'], msg => {
+  
   log.info('start...........')
-
   User.findOne({chatId:msg.from.id}).then(function(myuser){
         if (myuser) return  bot.sendMessage(msg.from.id, 'Bentornato');
         // /start email:name:hashcode
+
+        if (msg.text.length < 7) return bot.sendMessage(msg.from.id, "Ops! non sei registrato!");
         var code = unescape(msg.text).substring(7)
         var ar = _.split(code,':')
         log.info(ar)
