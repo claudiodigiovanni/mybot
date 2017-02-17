@@ -256,21 +256,27 @@ var users = []
 // On commands
 bot.on(['/start'], msg => {
   log.info('start...........')
-  // /start email:name:hashcode
-  var code = unescape(msg.text).substring(7)
-  var ar = _.split(code,':')
-  log.info(ar)
-  User.findOne({email:ar[0]}).then(function(user){
-    if (user != null)
-      return bot.sendMessage(msg.from.id, 'Bentornato ' + ar[1] + "!");
-    else if (user == null && ar[2] == hashcode){
-        var u = new User({name:ar[1],chatId:msg.from.id, response:"{}", email:ar[0]})
-        u.save()
-        //non importa: posso dare il messaggio anche se il save è asincrono....
-        return bot.sendMessage(msg.from.id, 'Benvenuto ' + ar[1] + "!");
-    }
-    return bot.sendMessage(msg.from.id, "Ops! non sei registrato!");
-})})
+
+  User.findOne({chatId:msg.from.id}).then(function(myuser){
+        if (myuser) return  bot.sendMessage(msg.from.id, 'Bentornato');
+        // /start email:name:hashcode
+        var code = unescape(msg.text).substring(7)
+        var ar = _.split(code,':')
+        log.info(ar)
+        User.findOne({email:ar[0]}).then(function(user){
+          if (user != null)
+            return bot.sendMessage(msg.from.id, 'Bentornato ' + ar[1] + "!");
+          else if (user == null && ar[2] == hashcode){
+              var u = new User({name:ar[1],chatId:msg.from.id, response:"{}", email:ar[0]})
+              u.save()
+              //non importa: posso dare il messaggio anche se il save è asincrono....
+              bot.sendMessage(msg.from.id, 'Benvenuto ' + ar[1] + "!");
+              return bot.sendPhoto(msg.from.id, 'steve.png')
+          }
+          return bot.sendMessage(msg.from.id, "Ops! non sei registrato!");
+          })
+  })
+})
 
 //********************************************** */
 // On Text
