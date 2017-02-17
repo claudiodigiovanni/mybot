@@ -8,6 +8,7 @@ var Schema = mongoose.Schema;
 var userSchema = new Schema({
   chatId: { type: String, required: false },
   email: { type: String, required: false  },
+  name: { type: String, required: false },
   response: { type: String, required: false },
   enabled: { type: Boolean},
   nome: { type: String, required: false },

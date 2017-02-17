@@ -78,7 +78,7 @@ function createBooking(date,time,userEmail){
                     newTime += " - " + getHourMinuteFromSlot(value.value)
                   }
                 });
-                defer.resolve("Ops! Nessun campo disponibile per quell'ora. Se vuoi i seguenti orari risultano ancora disponibili:  " + newTime)   
+                defer.resolve("Ops! *Nessun campo disponibile* per quell'ora. Se vuoi i seguenti orari *risultano ancora disponibili* :  " + newTime)   
                 })
         } else{
           log.info('verify: ok....')
@@ -106,7 +106,7 @@ function findMyBookings(date,time,userEmail){
   request.post({url:'http://localhost:3000/botApi/v1/findMyBookings', form: form1}, function(err,httpResponse,body){ 
     
         log.info('findMyBookings..')
-        var ret = "Ecco i tuoi impegni \n"
+        var ret = "*Ecco i tuoi impegni* \n"
         var data =JSON.parse(body)
         _.each(data.data,function(item){
           ret += moment(item.startHour).format('DD/MM/YY HH:mm') + " - " + moment(item.endHour).format('HH:mm') + "\n"
@@ -134,7 +134,12 @@ function alchemyEntitiesCallback(obj,address){
         return item.type == obj
       })
       log.info(filteredObjects)
-      defer.resolve(JSON.stringify(filteredObjects))
+      var mystring = ""
+      _.each(filteredObjects,function(item){
+        mystring += "*Tipo*: " + item.type + "   *Rilevanza*: " + item.relevance + "   *Num. citazioni*: " + item.count + "   *Valore*: " + item.text + " \n"
+      })
+      defer.resolve(mystring)
+      log.info('alchemyEntitiesCallback end......')
       // Do something with data
     });
     return defer.promise
@@ -167,10 +172,11 @@ function processResponse(err,response,defer,myresp,user,chatId){
             return;
           }
           if (response.output.action === 'chuck') {
-             console.error('ciao.....'); 
+            /*const API = 'https://thecatapi.com/api/images/get?format=src&type=';
+            bot.sendPhoto(chatId, API + 'png', { fileName: 'kitty.jpg' });*/
             chuck.getRandom().then(function (data) {
                 console.log(data.value.joke);
-                defer.resolve(data.value.joke)
+                defer.resolve("_" + data.value.joke + "_")
             });
           }
           else if (response.output.action === 'prenota') {
@@ -187,7 +193,7 @@ function processResponse(err,response,defer,myresp,user,chatId){
                 console.log("weather");
                 console.log(response.context.citta);  
                 console.log(smart.main);
-                  myresp = "Condizioni meteo di " + response.context.citta + ": " + smart.weather[0].description + "\n"
+                  myresp = "*Condizioni meteo di " + response.context.citta + ": " + smart.weather[0].description + "* \n"
                   myresp += "Temperatura:" + JSON.stringify(smart.main.temp) + "\n"
                   myresp += "Pressione:" + JSON.stringify(smart.main.pressure) + "\n"
                   myresp += "Umidità:" + JSON.stringify(smart.main.humidity) + "\n"
@@ -210,7 +216,7 @@ function processResponse(err,response,defer,myresp,user,chatId){
               log.info(obj)
               log.info(address)
               bot.sendMessage(chatId, "Dammi un attimo per favore....;-)");
-              alchemyEntitiesCallback(obj,address).then(function(message){ defer.resolve(message)})
+              alchemyEntitiesCallback(obj,address).then(function(message){ log.info('okkkkkkk1111');log.info(message);defer.resolve(message)})
           } 
           else if (response.output.action === 'newAddress') {
               log.info('newAddress')
@@ -253,6 +259,7 @@ bot.on(['/start'], msg => {
   // /start email:name:hashcode
   var code = unescape(msg.text).substring(7)
   var ar = _.split(code,':')
+  log.info(ar)
   User.findOne({email:ar[0]}).then(function(user){
     if (user != null)
       return bot.sendMessage(msg.from.id, 'Bentornato ' + ar[1] + "!");
@@ -277,7 +284,6 @@ bot.on(['text'], msg => {
     var user = _.find(users,function(u){
       return u.chatId == chatId
     })
-   
     if (user == null){
       User.findOne({chatId:chatId}).then(function(myuser){
         user = myuser._doc
@@ -288,12 +294,12 @@ bot.on(['text'], msg => {
       })
     }
     else{
+      let parse = "Markdown"
       sendMessageToWatsonAndProcessIt(msg.text,chatId,user).then(function(response){
-          return bot.sendMessage(chatId, response);
+          return bot.sendMessage(chatId, response, {parse});
       })
     }
 })
-
 bot.connect();
 
 //********************************************** */
