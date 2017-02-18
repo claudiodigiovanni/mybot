@@ -111,6 +111,7 @@ function findMyBookings(date,time,userEmail){
         _.each(data.data,function(item){
           ret += moment(item.startHour).format('DD/MM/YY HH:mm') + " - " + moment(item.endHour).format('HH:mm') + "\n"
         })
+        if (data.data.length == 0) ret = "*Non hai nessun impegno.* Si batte la fiacca eh!"
         defer.resolve(ret)
         
     })
